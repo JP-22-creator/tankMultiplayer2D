@@ -326,6 +326,7 @@ GameObject:
   - component: {fileID: 2327017020337194268}
   - component: {fileID: 43947113389475848}
   - component: {fileID: -9199928095158958245}
+  - component: {fileID: 6602188480762519712}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -480,6 +481,21 @@ MonoBehaviour:
   fireRate: 1
   muzzleFlashDuration: 0.22
   input: {fileID: 11400000, guid: a497a6352f9eebb44aa63ce855f0589c, type: 2}
+--- !u!114 &6602188480762519712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1955077353952916331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a54717cd28cb3114bb33cdc10f159898, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentHealth:
+    m_InternalValue: 0
+  <MaxHealth>k__BackingField: 100
 --- !u!1 &1978263466979196696
 GameObject:
   m_ObjectHideFlags: 0
