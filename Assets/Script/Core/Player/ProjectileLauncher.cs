@@ -82,6 +82,7 @@ public class ProjectileLauncher : NetworkBehaviour
         GameObject go = Instantiate(serverProjectile, spawnPosition, Quaternion.identity);
         go.transform.up = direction;
 
+
         if (go.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
         {
             rb.velocity = rb.transform.up * projectileSpeed;

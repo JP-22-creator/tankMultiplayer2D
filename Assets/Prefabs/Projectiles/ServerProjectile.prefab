@@ -48,6 +48,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2260798931612934967, guid: fdfe0bce507755f4d85b603b747775a4, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6010143567977141532, guid: fdfe0bce507755f4d85b603b747775a4, type: 3}
       propertyPath: m_Name
       value: ServerProjectile
@@ -57,8 +61,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6010143567977141532, guid: fdfe0bce507755f4d85b603b747775a4, type: 3}
-      insertIndex: -1
+      insertIndex: 1
       addedObject: {fileID: 6739314501235385866}
+    - targetCorrespondingSourceObject: {fileID: 6010143567977141532, guid: fdfe0bce507755f4d85b603b747775a4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4841970570371431980}
   m_SourcePrefab: {fileID: 100100000, guid: fdfe0bce507755f4d85b603b747775a4, type: 3}
 --- !u!1 &3296329737026688106 stripped
 GameObject:
@@ -92,3 +99,16 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &4841970570371431980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3296329737026688106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3518173877085242a16483de32401cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 10
