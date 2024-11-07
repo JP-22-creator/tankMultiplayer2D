@@ -13,7 +13,8 @@ public class HealthDisplay : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (!IsClient) return;
+        if (!IsClient) return; // everyone that has a ui subscribes too this
+                               // all players subscribe too each other !
         health.CurrentHealth.OnValueChanged += HandleHealthChanged;
         HandleHealthChanged(0, health.CurrentHealth.Value); // catch pre subscribe change
     }

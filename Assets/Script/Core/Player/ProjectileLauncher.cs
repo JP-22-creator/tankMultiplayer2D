@@ -17,12 +17,17 @@ public class ProjectileLauncher : NetworkBehaviour
     [SerializeField] private float fireRate;
     [SerializeField] private float muzzleFlashDuration;
 
+
+
+
     [SerializeField] private InputReader input;
 
+
+
     private bool shouldFire;
-    private float previousFireTime;
     private float muzzleFlashTimer;
 
+    private float timer;
 
     public override void OnNetworkSpawn()
     {
@@ -44,11 +49,17 @@ public class ProjectileLauncher : NetworkBehaviour
 
 
         if (!IsOwner) return;
+
+        if (timer > 0)
+        {
+            timer -= Time.deltaTime;
+            return;
+        }
         if (!shouldFire) return;
 
-        if (Time.time < (1 / fireRate) + previousFireTime) return; // should not be used on server side bcs of ping
 
-        previousFireTime = Time.time;
+
+        timer = 1 / fireRate;
 
         SpawnDummyProjectile(projectileSpawnPoint.position, projectileSpawnPoint.up); // client sees local bullet
 
