@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
+using Unity.Services.Lobbies;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using Unity.Services.Lobbies.Models;
+using System.Collections;
 
 public class HostGameManager
 {
@@ -13,6 +17,7 @@ public class HostGameManager
     private const String gameSceneName = "Game";
     private Allocation allocation;
     private String joinCode;
+    private String lobbyID;
 
     public async Task StartHostAsync()
     {
@@ -21,6 +26,34 @@ public class HostGameManager
         if (allocation == null) return;
 
         joinCode = await GetJoinCode();
+
+
+        try
+        {
+            CreateLobbyOptions lobbyOptions = new CreateLobbyOptions();
+            lobbyOptions.IsPrivate = false;
+            lobbyOptions.Data = new Dictionary<String, DataObject>() // parse information too Lobbie object on network
+            {
+                {
+                    "JoinCode", // key
+                    new DataObject( // value
+                    visibility: DataObject.VisibilityOptions.Member, // TODO look into Member privat public
+                    value: joinCode
+                    )
+                }
+            };
+
+            Lobby lobby = await Lobbies.Instance.CreateLobbyAsync("Lobby Name", maxConnections, lobbyOptions);
+            lobbyID = lobby.Id;
+            HostSingleton.Instance.StartCoroutine(HearthBeatLobby(15f));
+        }
+        catch (LobbyServiceException LSE)
+        {
+            Debug.LogError(LSE.Message);
+            return;
+        }
+
+
 
         // process of changing transport too relay if needed!
         UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>(); // get acces
@@ -67,6 +100,17 @@ public class HostGameManager
         }
 
         return code;
+    }
+
+
+    private IEnumerator HearthBeatLobby(float waitTimeSeconds)
+    {
+        WaitForSecondsRealtime delay = new WaitForSecondsRealtime(waitTimeSeconds);
+        while (true)
+        {
+            Lobbies.Instance.SendHeartbeatPingAsync(lobbyID); // has to ping too keep  the lobbie exisiting
+            yield return delay;
+        }
     }
 
 
