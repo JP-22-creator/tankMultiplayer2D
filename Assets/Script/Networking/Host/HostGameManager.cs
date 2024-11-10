@@ -18,6 +18,7 @@ public class HostGameManager
     {
 
         allocation = await GetAllocation();
+        if (allocation == null) return;
 
         joinCode = await GetJoinCode();
 
@@ -30,6 +31,7 @@ public class HostGameManager
 
         NetworkManager.Singleton.SceneManager.LoadScene(gameSceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
         // Disables clients from chaning scene 
+        // When a client connects to server it will be brought too this scene
         // Inits the NetworkObjects correctl
 
     }
