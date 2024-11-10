@@ -25,12 +25,14 @@ public class ApplicationController : MonoBehaviour
         else
         {
             // the Singletons allow acces too the functionality
+
+            HostSingleton hostSingleton = Instantiate(hostPrefab);
+            hostSingleton.CreateHost(); // has to be created first bcs the scene changes  too fast for DDOL to call
+
             ClientSingleton clientSingleton = Instantiate(clientPrefab);
             bool auth = await clientSingleton.CreateClient(); // this one connects too the UGS
 
 
-            HostSingleton hostSingleton = Instantiate(hostPrefab);
-            hostSingleton.CreateHost();
 
             if (auth)
             {

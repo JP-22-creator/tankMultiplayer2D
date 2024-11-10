@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class HostSingleton : MonoBehaviour // enable global acces too HGM 
 {
-    private HostGameManager gameManager;
+    public HostGameManager GameManager { get; private set; }
 
 
 
@@ -38,7 +38,7 @@ public class HostSingleton : MonoBehaviour // enable global acces too HGM
 
     public void CreateHost()
     {
-        gameManager = new HostGameManager();
+        GameManager = new HostGameManager();
 
 
     }
