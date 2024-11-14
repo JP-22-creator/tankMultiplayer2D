@@ -10,6 +10,7 @@ using Unity.Services.Relay.Models;
 using UnityEngine;
 using Unity.Services.Lobbies.Models;
 using System.Collections;
+using System.Text;
 
 public class HostGameManager
 {
@@ -19,6 +20,9 @@ public class HostGameManager
     private String joinCode;
     private String lobbyID;
 
+
+    private NetworkServer networkServer;
+
     public async Task StartHostAsync()
     {
 
@@ -26,32 +30,11 @@ public class HostGameManager
         if (allocation == null) return;
 
         joinCode = await GetJoinCode();
+        // this is relay 
 
 
-        try
-        {
-            CreateLobbyOptions lobbyOptions = new CreateLobbyOptions();
-            lobbyOptions.IsPrivate = false;
-            lobbyOptions.Data = new Dictionary<String, DataObject>() // parse information too Lobbie object on network
-            {
-                {
-                    "JoinCode", // key
-                    new DataObject( // value
-                    visibility: DataObject.VisibilityOptions.Member, // TODO look into Member privat public
-                    value: joinCode
-                    )
-                }
-            };
-
-            Lobby lobby = await Lobbies.Instance.CreateLobbyAsync("Lobby Name", maxConnections, lobbyOptions);
-            lobbyID = lobby.Id;
-            HostSingleton.Instance.StartCoroutine(HearthBeatLobby(15f));
-        }
-        catch (LobbyServiceException LSE)
-        {
-            Debug.LogError(LSE.Message);
-            return;
-        }
+        await GetLobby();
+        // put lobby online and start hearthbeat
 
 
 
@@ -59,6 +42,20 @@ public class HostGameManager
         UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>(); // get acces
         RelayServerData relayServerData = new RelayServerData(allocation, "udp"); // package the select
         transport.SetRelayServerData(relayServerData); // set too use relay
+
+
+        networkServer = new NetworkServer(NetworkManager.Singleton);
+
+
+        UserData userData = new UserData
+        {
+            userName = PlayerPrefs.GetString(NameSelector.PlayerNameKey, "Missing Name")
+        };
+
+        string payload = JsonUtility.ToJson(userData);
+        byte[] payloadBytes = Encoding.UTF8.GetBytes(payload);
+
+        NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes;
 
         NetworkManager.Singleton.StartHost();
 
@@ -101,6 +98,37 @@ public class HostGameManager
 
         return code;
     }
+
+
+
+    private async Task GetLobby()
+    {
+        try
+        {
+            CreateLobbyOptions lobbyOptions = new CreateLobbyOptions();
+            lobbyOptions.IsPrivate = false;
+            lobbyOptions.Data = new Dictionary<String, DataObject>() // parse information too Lobbie object on network
+            {
+                {
+                    "JoinCode", // key
+                    new DataObject( // value
+                    visibility: DataObject.VisibilityOptions.Member, // TODO look into Member privat public
+                    value: joinCode
+                    )
+                }
+            };
+
+            Lobby lobby = await Lobbies.Instance.CreateLobbyAsync(PlayerPrefs.GetString(NameSelector.PlayerNameKey, "Lobby"), maxConnections, lobbyOptions);
+            lobbyID = lobby.Id;
+            HostSingleton.Instance.StartCoroutine(HearthBeatLobby(15f));
+        }
+        catch (LobbyServiceException LSE)
+        {
+            Debug.LogError(LSE.Message);
+            return;
+        }
+    }
+
 
 
     private IEnumerator HearthBeatLobby(float waitTimeSeconds)

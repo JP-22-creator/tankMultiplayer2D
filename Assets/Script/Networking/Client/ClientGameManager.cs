@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -41,6 +42,18 @@ public class ClientGameManager
         RelayServerData relayServerData = new RelayServerData(joinAllocation, "udp");
         transport.SetRelayServerData(relayServerData);
 
+
+        //Send locally grabbed data too server
+        UserData userData = new UserData
+        {
+            userName = PlayerPrefs.GetString(NameSelector.PlayerNameKey, "Missing Name")
+        };
+
+        byte[] payloadBytes = SerializeData(userData);
+
+        NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes; // will be send when connecting
+
+
         NetworkManager.Singleton.StartClient();
         // this should already change the Scene 
     }
@@ -62,6 +75,13 @@ public class ClientGameManager
         return alloc;
     }
 
+
+    private byte[] SerializeData(UserData userData)
+    {
+        string payload = JsonUtility.ToJson(userData);
+        byte[] payloadBytes = Encoding.UTF8.GetBytes(payload);
+        return payloadBytes;
+    }
 
 
     public void GoToMenu()
