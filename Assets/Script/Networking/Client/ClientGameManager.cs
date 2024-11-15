@@ -6,21 +6,25 @@ using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
+using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ClientGameManager
+public class ClientGameManager : IDisposable
 {
 
     private const string MenuSceneName = "Menu";
     private JoinAllocation joinAllocation;
+    private NetworkClient networkClient;
 
     public async Task<bool> InitAsync()
     {
         await UnityServices.InitializeAsync(); // very important
+
+        networkClient = new NetworkClient(NetworkManager.Singleton);
 
         AuthState authState = await AuthenticationWrapper.DoAuth();
 
@@ -46,7 +50,8 @@ public class ClientGameManager
         //Send locally grabbed data too server
         UserData userData = new UserData
         {
-            userName = PlayerPrefs.GetString(NameSelector.PlayerNameKey, "Missing Name")
+            userName = PlayerPrefs.GetString(NameSelector.PlayerNameKey, "Missing Name"),
+            userAuthId = AuthenticationService.Instance.PlayerId // available after authentication / uniq id 
         };
 
         byte[] payloadBytes = SerializeData(userData);
@@ -88,5 +93,11 @@ public class ClientGameManager
     {
         // Authenticate player
         SceneManager.LoadScene(MenuSceneName);
+    }
+
+    public void Dispose()
+    {
+
+        networkClient?.Dispose();
     }
 }

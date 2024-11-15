@@ -43,4 +43,9 @@ public class HostSingleton : MonoBehaviour // enable global acces too HGM
 
     }
 
+    private void OnDestroy()
+    {
+        GameManager?.Dispose();
+    }
+
 }

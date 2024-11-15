@@ -35,6 +35,11 @@ public class ClientSingleton : MonoBehaviour // enable global acces too CGM
         DontDestroyOnLoad(gameObject);
     }
 
+    private void OnDestroy()
+    {
+        GameManager?.Dispose();
+    }
+
 
     public async Task<bool> CreateClient()
     {

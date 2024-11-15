@@ -11,8 +11,9 @@ using UnityEngine;
 using Unity.Services.Lobbies.Models;
 using System.Collections;
 using System.Text;
+using Unity.Services.Authentication;
 
-public class HostGameManager
+public class HostGameManager : IDisposable
 {
     private const int maxConnections = 4;
     private const String gameSceneName = "Game";
@@ -22,6 +23,24 @@ public class HostGameManager
 
 
     private NetworkServer networkServer;
+
+    public async void Dispose()
+    {
+        networkServer?.Dispose();
+        HostSingleton.Instance.StopCoroutine(nameof(HearthBeatLobby));
+
+        if (!string.IsNullOrEmpty(lobbyID)) // we still have a lobby ID
+        {
+            try
+            {
+                await Lobbies.Instance.DeleteLobbyAsync(lobbyID);
+            }
+            catch (LobbyServiceException LSE)
+            {
+                Debug.Log(LSE);
+            }
+        }
+    }
 
     public async Task StartHostAsync()
     {
@@ -49,7 +68,8 @@ public class HostGameManager
 
         UserData userData = new UserData
         {
-            userName = PlayerPrefs.GetString(NameSelector.PlayerNameKey, "Missing Name")
+            userName = PlayerPrefs.GetString(NameSelector.PlayerNameKey, "Missing Name"),
+            userAuthId = AuthenticationService.Instance.PlayerId
         };
 
         string payload = JsonUtility.ToJson(userData);

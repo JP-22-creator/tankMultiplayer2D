@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class NetworkServer
+public class NetworkServer : IDisposable
 {
+    private Dictionary<ulong, string> clientTOAuth = new Dictionary<ulong, string>();
+    private Dictionary<string, UserData> authTOUserData = new Dictionary<string, UserData>();
 
     private NetworkManager networkManager;
 
@@ -12,7 +15,7 @@ public class NetworkServer
         networkManager = nM;
         networkManager.ConnectionApprovalCallback += ApprovalCheck; // triggered on connection
                                                                     // can retrive some connection info
-
+        networkManager.OnServerStarted += OnNetworkReady;
     }
 
     private void ApprovalCheck(
@@ -21,11 +24,37 @@ public class NetworkServer
     {
         UserData userData = Desirealise(request);
         // now we can check if we want to approve
+
+        clientTOAuth[request.ClientNetworkId] = userData.userAuthId;
+        authTOUserData[userData.userAuthId] = userData;
+        // use instead of .Add() bcs it will override the existing value or add if new
+
+
+
+
+
         response.Approved = true;
-        // bcs of ConnectionApproval we have to spawn the player here
         response.CreatePlayerObject = true;
         //maybe we can change the spawn position
-        Debug.Log("------------------------" + userData.userName);
+
+
+
+
+
+    }
+
+    private void OnNetworkReady()
+    {
+        networkManager.OnClientDisconnectCallback += OnClientDisconnect;
+    }
+
+    private void OnClientDisconnect(ulong cliendId)
+    {
+        if (clientTOAuth.TryGetValue(cliendId, out string authId))
+        {
+            clientTOAuth.Remove(cliendId);
+            authTOUserData.Remove(authId);
+        }
     }
 
     private UserData Desirealise(NetworkManager.ConnectionApprovalRequest input)
@@ -35,5 +64,19 @@ public class NetworkServer
 
     }
 
+    public void Dispose()
+    {
+        if (networkManager != null)
+        {
+            networkManager.ConnectionApprovalCallback -= ApprovalCheck;
+            networkManager.OnClientDisconnectCallback -= OnClientDisconnect;
+            networkManager.OnServerStarted -= OnNetworkReady;
+        }
 
+        if (networkManager.IsListening)
+        {
+            networkManager.Shutdown();
+        }
+
+    }
 }
